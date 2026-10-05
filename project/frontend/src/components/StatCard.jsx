@@ -18,7 +18,7 @@ export default function StatCard({ icon: Icon, label, value, delta, trend = "up"
         </span>
       </div>
 
-      <p className="font-mono text-2xl font-semibold mt-4 tracking-tight">{value}</p>
+      <p className="font-display tabular-nums text-2xl font-bold mt-4 tracking-tight">{value}</p>
       <p className="text-xs text-text-muted mt-1">{label}</p>
 
       {sparkline && (

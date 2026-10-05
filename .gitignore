@@ -14,8 +14,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Build output
-/dist/
-/build/
+dist/
+build/
 
 # OS files
 .DS_Store

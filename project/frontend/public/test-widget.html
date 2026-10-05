@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Store Demo — Embedded Chatbot Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+    }
+    .hero {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 0 24px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 40px;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+    p {
+      color: #64748b;
+      font-size: 18px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .demo-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: left;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .demo-box h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+    .demo-box ul {
+      color: #475569;
+      font-size: 14px;
+      padding-left: 20px;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">ACME eCommerce Store</div>
+    <nav style="color: #64748b; font-size: 14px;">Products · Pricing · Support</nav>
+  </header>
+
+  <div class="hero">
+    <div class="badge">Chatbot Widget Live Test</div>
+    <h1>Look at the bottom-right corner! 👇</h1>
+    <p>This is a mock client website with the SupportAI embed script installed.</p>
+
+    <div class="demo-box">
+      <h3>Try asking the bot:</h3>
+      <ul>
+        <li>"What is your refund policy?"</li>
+        <li>"What are the API rate limits?"</li>
+        <li>"Is customer data encrypted?"</li>
+        <li>"I want to speak with a human agent" (watch it escalate to your Live Inbox!)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- The 1-Line SupportAI Widget Embed Script -->
+  <script 
+    src="/widget.js" 
+    data-api-base="http://localhost:5000/api" 
+    data-bot-name="SupportAI Assistant" 
+    data-primary-color="#000000" 
+    data-position="right"
+    defer>
+  </script>
+</body>
+</html>

@@ -25,7 +25,7 @@ export default {
       fontFamily: {
         display: ["Manrope", "sans-serif"],
         body: ["Manrope", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        mono: ["Manrope", "sans-serif"],
       },
       borderRadius: {
         card: "8px",

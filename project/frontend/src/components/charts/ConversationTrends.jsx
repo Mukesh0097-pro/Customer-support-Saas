@@ -31,12 +31,12 @@ export default function ConversationTrends() {
           <Tooltip
             contentStyle={{
               background: "#FFFFFF",
-              border: "1px solid rgba(0,0,0,0.12)",
+              border: "1px solid rgba(0, 0, 0, 1)",
               borderRadius: 8,
               fontSize: 12,
             }}
           />
-          <Line type="monotone" dataKey="ai" stroke="#000000" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="ai" stroke="#000000ff" strokeWidth={2} dot={false} />
           <Line type="monotone" dataKey="human" stroke="#666666" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
