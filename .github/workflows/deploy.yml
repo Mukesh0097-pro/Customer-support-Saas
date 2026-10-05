@@ -1,0 +1,124 @@
+name: SupportAI CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # -------------------------------------------------------------
+  # JOB 1: Code Quality & Security Scan with SonarQube / SonarCloud
+  # -------------------------------------------------------------
+  code-quality:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: project/frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd project/frontend
+          npm ci
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v3
+        continue-on-error: true # Prevents pipeline block if SonarCloud token is not yet configured
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}
+
+  # -------------------------------------------------------------
+  # JOB 2: Build & Validate Frontend and Backend
+  # -------------------------------------------------------------
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate Backend Dependencies
+        run: |
+          cd project/backend
+          npm ci
+
+      - name: Build Frontend Production Bundle
+        run: |
+          cd project/frontend
+          npm ci
+          npm run build
+
+  # -------------------------------------------------------------
+  # JOB 3: Continuous Deployment to AWS EC2
+  # -------------------------------------------------------------
+  deploy:
+    name: Deploy to AWS EC2
+    needs: [build-and-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check AWS Secrets Availability
+        id: check-secrets
+        run: |
+          if [ -n "${{ secrets.AWS_EC2_HOST }}" ] && [ -n "${{ secrets.AWS_SSH_PRIVATE_KEY }}" ]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "AWS secrets not yet provided. Skipping remote SSH deploy step."
+          fi
+
+      - name: Deploy on AWS via SSH
+        if: steps.check-secrets.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            echo "🚀 Deploying SupportAI on AWS EC2..."
+            
+            if [ ! -d "$HOME/app/.git" ]; then
+              git clone https://github.com/${{ github.repository }}.git $HOME/app
+            fi
+
+            cd $HOME/app
+            git fetch origin main
+            git reset --hard origin/main
+
+            cat <<EOF > project/backend/.env
+            PORT=5000
+            NODE_ENV=production
+            JWT_SECRET=${{ secrets.PROD_JWT_SECRET || 'secret-jwt-key-prod' }}
+            JWT_EXPIRES_IN=7d
+            GOOGLE_CLIENT_ID=${{ secrets.PROD_GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.PROD_GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CALLBACK_URL=http://${{ secrets.AWS_EC2_HOST }}/api/auth/google/callback
+            CLIENT_URL=http://${{ secrets.AWS_EC2_HOST }}
+            EOF
+
+            cat <<EOF > project/frontend/.env
+            VITE_API_URL=http://${{ secrets.AWS_EC2_HOST }}/api
+            EOF
+
+            docker compose down || true
+            docker compose up -d --build
+
+            echo "✅ Deployment completed successfully!"
